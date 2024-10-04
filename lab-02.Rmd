@@ -1,6 +1,6 @@
 ---
 title: "Lab 02 - Global plastic waste"
-author: "Gomakashi: vivihuangx, hannaharull, Marcel, Siddhi, User5 and User6"
+author: "Gomakashi: vivihuangx, hannaharull, Marcel, Siddhi, Sky and Maggie"
 date: "`r Sys.Date()`"
 output: html_document
 ---
