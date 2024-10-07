@@ -10,6 +10,8 @@ output: html_document
 ```{r load-packages, message = FALSE, warning=FALSE}
 library(tidyverse)
 library(readxl)
+library(RColorBrewer)
+library(stringr)
 ```
 
 
@@ -97,10 +99,15 @@ plastic_data_all %>%
 #Changes , to . before calculation
 plastic_data_all$mismanaged_plastic_ocean <- gsub("," , "." , plastic_data_all$mismanaged_plastic_ocean) 
 
-plastic_data_all %>%
-  # this step changes mismanaged_plastic_ocean from chr to dbl
+#Changes mismanaged_plastic_ocean to numeric values in memory
+plastic_data_all <- plastic_data_all %>%
   mutate(
-    mismanaged_plastic_ocean = as.numeric(mismanaged_plastic_ocean),
+    mismanaged_plastic_ocean = as.numeric(mismanaged_plastic_ocean)
+  )
+
+#Performing the task
+plastic_data_all %>%
+  mutate(
     pct_mismanaged_plastic_ocean = mismanaged_plastic_ocean / mismanaged_plastic
   ) %>%
   group_by(region) %>%
@@ -108,15 +115,60 @@ plastic_data_all %>%
     median_pct = median(pct_mismanaged_plastic_ocean, na.rm = TRUE)
   ) %>%
   arrange(desc(median_pct))
-  
 ```
 
 
 ### Ex 4.
 
-```{r Ex4, message = FALSE}
-# Write your code here to answer exercise 4
+```{r Ex4_1, message = FALSE}
+#Changes done straight to memory, run once only. If running whole Rmd (Ctrl + Shift + Alt + P), comment this block.
 
+plastic_data_all <- plastic_data_all %>%
+  rename(pop = "population",
+         MMP = "mismanaged_plastic",
+         MMP_ocean =  "mismanaged_plastic_ocean"
+         ) %>%
+  mutate(
+        region = str_replace_all(region, "Latin America and The Caribbean", "LAC")
+  )
+```
 
+```{r Ex4_2, message = FALSE}
+#Function provided by Richie Cotton, https://stackoverflow.com/questions/2631780
+wrapper <- function(x, ...) 
+{
+  paste(strwrap(x, ...), collapse = "\n")
+}
+
+#Generates plot
+
+ggplot(
+  data = plastic_data_all,
+  mapping = aes(
+    x = MMP,
+    y = MMP_ocean,
+    colour = region
+  )
+) +
+  
+  #See https://r-graph-gallery.com/38-rcolorbrewers-palettes.html for more palettes
+  scale_color_brewer(palette = "Dark2") +
+  
+  geom_point(
+    size = 3,
+    alpha = 0.5
+  ) +
+  
+  #Makes x- and y-axes log10
+  scale_x_log10() +
+  scale_y_log10() +
+  
+  labs(
+    title = wrapper("Correlation between mismanaged plastic in ocean and total mismanaged plastic by country per capita", 60),
+    x = "Mismanaged plastic per capita",
+    y = "Mismanaged ocean plastic per capita",
+  ) +
+  #centers title
+  theme(plot.title = element_text(hjust = 0.5))
 
 ```
