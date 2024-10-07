@@ -18,19 +18,14 @@ library(readxl)
 ```{r load-data, message = FALSE}
 data1 <- read_csv("data/mismanaged-plastic-waste-per-capita.csv")
 
-
-
 # Member 4 (pair 2) write code to load File 2 data here:
 data2 <- read_delim("data/per-capita-ocean-plastic-waste.txt", delim = ";")
-
 
 # Member 6 (pair 3) write code to load File 3 data here:
 data3 <- read_tsv("data/UN_country_population.tsv")
 
-
 # Member 1 (pair 1) write code to load File 4 data here:
 data4 <- read_excel("data/UN_country_region.xlsx")
-
 
 ```
 
@@ -38,9 +33,6 @@ data4 <- read_excel("data/UN_country_region.xlsx")
 
 ```{r join-data, message = FALSE}
 plastic_data_all <- data1
-
-
-
 
 # Member 4 (pair 2) write code to join your data to 'plastic_data_all':
 
@@ -53,21 +45,16 @@ plastic_data_all <- data3 %>%
   select(-name) %>%
   right_join(plastic_data_all, by = "code")
 
-
-
 # Member 1 (pair 1) write code to join your data to 'plastic_data_all':
 plastic_data_all <- data4 %>%
   select(-name) %>%
   right_join(plastic_data_all, by = "code")
-
 
 ```
 
 
 ```{r print-data, message = FALSE}
 plastic_data_all %>% head(n = 10)
-
-
 
 ```
 
@@ -81,7 +68,6 @@ plastic_data_all %>% head(n = 10)
 plastic_data_all %>%
   count(region)%>%
   arrange(desc(n))
-  
 
 ```
 
@@ -90,9 +76,17 @@ plastic_data_all %>%
 ### Ex 2.
 
 ```{r Ex2, message = FALSE}
-# Write your code here to answer exercise 2
+plastic_data_all %>%
+  mutate(
+    total_mismanage_plastic = mismanaged_plastic * population
+  ) %>%
+  group_by(region) %>%
+  summarise(
+    mean_total = mean(total_mismanage_plastic, na.rm = TRUE)
+  ) %>%
+  arrange(desc(mean_total))
 
-
+#As we can see from the data, Asia has the highest and Oceania has the lowest total.
 
 ```
 
@@ -100,10 +94,21 @@ plastic_data_all %>%
 ### Ex 3.
 
 ```{r Ex3, message = FALSE}
-# Write your code here to answer exercise 3
+#Changes , to . before calculation
+plastic_data_all$mismanaged_plastic_ocean <- gsub("," , "." , plastic_data_all$mismanaged_plastic_ocean) 
 
-
-
+plastic_data_all %>%
+  # this step changes mismanaged_plastic_ocean from chr to dbl
+  mutate(
+    mismanaged_plastic_ocean = as.numeric(mismanaged_plastic_ocean),
+    pct_mismanaged_plastic_ocean = mismanaged_plastic_ocean / mismanaged_plastic
+  ) %>%
+  group_by(region) %>%
+  summarise(
+    median_pct = median(pct_mismanaged_plastic_ocean, na.rm = TRUE)
+  ) %>%
+  arrange(desc(median_pct))
+  
 ```
 
 
